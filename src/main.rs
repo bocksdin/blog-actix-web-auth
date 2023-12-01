@@ -1,6 +1,9 @@
 use actix_web::{get, web::Data, App, HttpResponse, HttpServer, Responder};
 
+// Actix Web
 use actix_web::{dev::ServiceRequest, error::Error, web, HttpMessage};
+
+// Auth Extractors and Middleware
 use actix_web_httpauth::{
     extractors::{
         bearer::{self, BearerAuth},
@@ -8,11 +11,17 @@ use actix_web_httpauth::{
     },
     middleware::HttpAuthentication,
 };
-use dotenv::dotenv;
-use hmac::{Hmac, Mac};
+
+// Json Web Token
 use jwt::VerifyWithKey;
-use serde::{Deserialize, Serialize};
+
+// Password Hashing
+use hmac::{Hmac, Mac};
 use sha2::Sha256;
+
+// Other
+use serde::{Deserialize, Serialize};
+use dotenv::dotenv;
 use std::sync::Mutex;
 use uuid::Uuid;
 

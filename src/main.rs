@@ -20,8 +20,8 @@ use hmac::{Hmac, Mac};
 use sha2::Sha256;
 
 // Other
-use serde::{Deserialize, Serialize};
 use dotenv::dotenv;
+use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
 use uuid::Uuid;
 
@@ -38,11 +38,13 @@ struct AppState {
     users: Mutex<Vec<User>>, // <- Mutex is necessary to mutate safely across threads
 }
 
+// Structure of the data contained in the JWT
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TokenClaims {
     id: Uuid,
 }
 
+// Middleware for JWT validation
 async fn validator(
     req: ServiceRequest,
     credentials: BearerAuth,
@@ -95,13 +97,18 @@ async fn main() -> std::io::Result<()> {
             .app_data(Data::new(AppState {
                 users: Mutex::new(vec![]),
             }))
+            // Routes outside the Bearer token middleware
             .service(index)
             .service(basic_auth)
             .service(create_user)
             .service(
-                // Wrap the services in the middleware
-                web::scope("")
+                // Define a new scope to add middleware
+                // This string is located in between the base (http://localhost:8080/) and your endpoints (/create-todolist-entry, /get-todolist-entries, etc.)
+                // Ex. http://localhost:8080/v1/create-todolist-entry
+                web::scope("") // http://localhost:8080/<endpoint name>
+                    // Utilize the Bearer middleware
                     .wrap(bearer_middleware)
+                    // Routes requiring a Bearer token
                     .configure(services::config),
             )
     })

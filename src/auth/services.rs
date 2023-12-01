@@ -1,13 +1,22 @@
+// Actix Web
 use actix_web::{
     get, post,
     web::{Data, Json},
     HttpResponse, Responder,
 };
+
+// Auth extractors
 use actix_web_httpauth::extractors::basic::BasicAuth;
+
+// JWT
+use jwt::SignWithKey;
+
+// Password hashing
 use argonautica::{Hasher, Verifier};
 use hmac::{Hmac, Mac};
-use jwt::SignWithKey;
 use sha2::Sha256;
+
+// Other
 use uuid::Uuid;
 
 // Structs from src/main.rs
@@ -44,7 +53,7 @@ async fn create_user(state: Data<AppState>, body: Json<CreateUserBody>) -> impl 
     HttpResponse::Ok().json(new_user)
 }
 
-#[get("/auth")]
+#[get("/login")]
 async fn basic_auth(state: Data<AppState>, credentials: BasicAuth) -> impl Responder {
     // Grab the JWT secret from the .env file
     let jwt_secret: Hmac<Sha256> = Hmac::new_from_slice(
@@ -70,7 +79,7 @@ async fn basic_auth(state: Data<AppState>, credentials: BasicAuth) -> impl Respo
                 .find(|user| user.username == username)
             {
                 Some(user) => {
-                    // Verify the password
+                    // Verify the password sent matches the hashed password
                     let hash_secret =
                         std::env::var("HASH_SECRET").expect("HASH_SECRET must be set!");
                     let mut verifier = Verifier::default();

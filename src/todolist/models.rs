@@ -9,7 +9,7 @@ pub struct TodolistEntry {
 
 #[derive(Deserialize)]
 pub struct CreateEntryBody {
-    pub title: String
+    pub title: String,
 }
 
 #[derive(Deserialize)]

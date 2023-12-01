@@ -1,10 +1,17 @@
-use super::models::{CreateEntryBody, TodolistEntry, CompleteEntryBody};
-use crate::AppState;
-use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
+use super::models::{CompleteEntryBody, CreateEntryBody, TodolistEntry};
+use crate::{AppState, TokenClaims};
+use actix_web::{
+    delete, get, post, put,
+    web::{self, ReqData},
+    HttpResponse, Responder,
+};
 
 #[get("/todolist/entries")]
-async fn get_entries(data: web::Data<AppState>) -> impl Responder {
-    HttpResponse::Ok().json("TODO")
+async fn get_entries(req_user: Option<ReqData<TokenClaims>>) -> impl Responder {
+    match req_user {
+        Some(user) => HttpResponse::Ok().json(format!("User: {}", user.id)),
+        None => HttpResponse::Unauthorized().json("Unable to verify identity"),
+    }
 }
 
 #[post("/todolist/entries")]
